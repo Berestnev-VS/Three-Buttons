@@ -9,7 +9,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    let buttonTitles = ["Short", "MediumBtn", "Looooong Button"]
+    let buttonTitles = ["Short", "MediumBtn", "Loong Button"]
     
     lazy var buttons = buttonTitles.map { title in
         let button = UIButton(type: .system)
