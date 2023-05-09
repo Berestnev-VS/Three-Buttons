@@ -7,33 +7,70 @@
 
 import UIKit
 
+class Button: UIButton {
+
+    init(title: String) {
+        super.init(frame: .zero)
+        setTitle(title, for: .normal)
+        setImage(.init(systemName: "bird.flll")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        setImage(.init(systemName: "bird.flll")?.withRenderingMode(.alwaysTemplate), for: .highlighted)
+        
+        tintColorDidChange()
+        
+        layer.cornerRadius = 12
+        layer.cornerCurve = .continuous        
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override open var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.15, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: [.beginFromCurrentState, .allowUserInteraction]) { 
+                self.transform = self.isHighlighted ? .init(scaleX: 0.9, y: 0.9) : .identity 
+            }
+        }
+    }
+    
+    override func tintColorDidChange() {
+        super.tintColorDidChange()
+        if tintAdjustmentMode == .dimmed {
+            self.imageView?.tintColor = .systemGray3
+            self.setTitleColor(.systemGray3, for: .normal)
+            self.backgroundColor = .systemGray2
+        } else {
+            self.imageView?.tintColor = .white
+            self.setTitleColor(.white, for: .normal)
+            self.backgroundColor = .systemGreen
+        }
+    }
+}
+
 class ViewController: UIViewController {
     
-    let buttonTitles = ["Short", "MediumBtn", "Loong Button"]
+    let buttonTitles = ["First Button", "Second Button", "Third Button"]
     
     lazy var buttons = buttonTitles.map { title in
-        let button = UIButton(type: .system)
-        button.setTitle(title, for: .normal)
+        let button = Button(title: title)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .systemGreen
-        button.setImage(UIImage(systemName: "swift"), for: .normal)
-        button.tintColor = .white
-        button.layer.cornerRadius = 12
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchDown)
-        button.addTarget(self, action: #selector(buttonReleased(_:)), for: .touchUpInside)
+        button.sizeToFit() // Чтобы размер зависел от контента. Работает и без него  
+        button.setImage(UIImage(systemName: "bird.fill"), for: .normal) 
+        button.setImage(UIImage(systemName: "bird.fill"), for: .highlighted)
         
         var buttonConfiguration = UIButton.Configuration.plain()
         buttonConfiguration.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 14)
         buttonConfiguration.imagePadding = 8
+        button.tintColor = .white
         buttonConfiguration.imagePlacement = .trailing
         button.configuration = buttonConfiguration
         return button
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupButtons(buttons)
+        buttons.last?.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchDown)
     }
     
     func setupButtons(_ buttons: [UIButton]) {
@@ -53,37 +90,27 @@ class ViewController: UIViewController {
         }
     }
     
-    func animateButton(_ button: UIButton, isPressed: Bool) {
-        let animationDuration: TimeInterval = 0.2
-        let scaleFactor: CGFloat = isPressed ? 0.9 : 1.0
-        
-        UIView.animate(withDuration: animationDuration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState], animations: {
-            button.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-        }, completion: nil)
-    }
     
-    @objc func buttonReleased(_ sender: UIButton) {
-        animateButton(sender, isPressed: false)
-    }
+//    func animateButton(_ button: UIButton, isPressed: Bool) {
+//        let animationDuration: TimeInterval = 0.2
+//        let scaleFactor: CGFloat = isPressed ? 0.9 : 1.0
+//        
+//        UIView.animate(withDuration: animationDuration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState], animations: {
+//            button.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+//        }, completion: nil)
+//    }
+//    
+//    @objc func buttonReleased(_ sender: UIButton) {
+//        animateButton(sender, isPressed: false)
+//    }
     
     @objc func buttonTapped(_ sender: UIButton) {
-        animateButton(sender, isPressed: true)
-        guard sender == buttons.last else { return }
-        buttons.forEach { button in 
-            button.backgroundColor = .systemGray
-        }
+//        animateButton(sender, isPressed: true)
         let modalViewController = UIViewController()
         modalViewController.modalPresentationStyle = .formSheet
-        modalViewController.presentationController?.delegate = self
         modalViewController.view.backgroundColor = .white
         present(modalViewController, animated: true)
     }
 }
 
-extension ViewController: UIAdaptivePresentationControllerDelegate {
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        buttons.forEach { button in
-            button.backgroundColor = .systemGreen
-        }
-    }
-}
+
